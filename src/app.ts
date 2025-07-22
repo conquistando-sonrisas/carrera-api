@@ -13,7 +13,7 @@ import carreraRouter from './routes/carreraRouter';
 
 export async function bootstrap(port: number) {
   const app = express();
-
+  app.set('trust proxy', 1)
   /**Middlewares app level */
   app.use(limiter);
   app.use(morgan('combined'));

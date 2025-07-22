@@ -24,6 +24,7 @@ export const processDonacionCarrera = async (args: DonacionUnicaArgs & { boletoI
       payer: {
         email: args.email
       },
+      notification_url: process.env.NOTIFICATION_URL,
       three_d_secure_mode: 'optional'
     },
   });

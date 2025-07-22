@@ -8,6 +8,7 @@ declare global {
       DB_NAME: string;
       DB_PASSWORD: string;
       CARRERA_PAGO_KEY: string;
+      NOTIFICATION_URL: string;
     }
   }
 }

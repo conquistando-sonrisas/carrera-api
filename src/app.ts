@@ -5,10 +5,10 @@ import 'dotenv/config'
 
 import express from 'express'
 import limiter from './config/limiter';
-import logger from './config/logger';
 import morgan from 'morgan';
 import cors from 'cors'
 import helmet from 'helmet';
+import carreraRouter from './routes/carreraRouter';
 
 
 export async function bootstrap(port: number) {
@@ -25,7 +25,7 @@ export async function bootstrap(port: number) {
 
 
   /** Route definition */
-
+  app.use('carrera', carreraRouter);
 
   const server = app.listen(port, () => {
     process.stdout.write(`App started listening on port ${port}`);

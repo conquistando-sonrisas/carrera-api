@@ -25,7 +25,7 @@ export async function bootstrap(port: number) {
 
 
   /** Route definition */
-  app.use('carrera', carreraRouter);
+  app.use('/api/v1/carrera', carreraRouter);
 
   const server = app.listen(port, () => {
     process.stdout.write(`App started listening on port ${port}`);

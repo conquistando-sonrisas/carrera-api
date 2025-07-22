@@ -81,3 +81,10 @@ export async function registerParticipantesPublic(req: Request, res: Response, n
     throw new Error('Error al registrar participante (s)')
   }
 }
+
+
+export async function processBoletoDonation(req: Request, res: Response, next: NextFunction) {
+  console.log('got to controller')
+  res.sendStatus(200)
+  return;
+}

@@ -9,9 +9,12 @@ import morgan from 'morgan';
 import cors from 'cors'
 import helmet from 'helmet';
 import carreraRouter from './routes/carreraRouter';
+import orm from './config/db';
 
 
 export async function bootstrap(port: number) {
+  await tryToConnectToDb();
+  
   const app = express();
   app.set('trust proxy', 1)
   /**Middlewares app level */
@@ -35,3 +38,12 @@ export async function bootstrap(port: number) {
 }
 
 
+async function tryToConnectToDb() {
+  try {
+    if (!process.env.DB_NAME) return;
+    
+    await orm.connect();
+  } catch (err) {
+    console.log('Connection to database failed', err)
+  }
+} 

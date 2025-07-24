@@ -9,7 +9,7 @@ import { Boleto } from "./entities/Boleto.entity";
 
 const config = defineConfig({
   driver: PostgreSqlDriver,
-  dbName: 'carrera',
+  dbName: process.env.DB_NAME,
   entities: [Participante, Boleto],
   debug: process.env.NODE_ENV !== 'production',
   forceUtcTimezone: true,

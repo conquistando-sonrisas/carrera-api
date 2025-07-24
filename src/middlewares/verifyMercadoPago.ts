@@ -14,13 +14,11 @@ export async function verifySignature(req: Request, res: Response, next: NextFun
   const hash = v1.split('=')[1].trim();
   const dataId = req.query['data.id'];
 
-  const manifest = `id:${dataId};request-id:${requestId};ts=${timestamp}`;
+  const manifest = `id:${dataId};request-id:${requestId};ts:${timestamp};`;
+  const hmac = crypto.createHmac('sha256', process.env.CARRERA_PAGO_KEY);
+  hmac.update(manifest);
 
-  const sha = crypto
-    .createHmac('sha256', process.env.CARRERA_PAGO_KEY)
-    .update(manifest)
-    .digest('hex');
-
+  const sha = hmac.digest('hex');
   console.log('comparing sha and hash', sha, hash);
 
   if (sha === hash) {

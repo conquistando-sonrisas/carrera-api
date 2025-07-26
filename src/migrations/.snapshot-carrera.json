@@ -75,15 +75,14 @@
           "length": 255,
           "mappedType": "string"
         },
-        "registered_by": {
-          "name": "registered_by",
-          "type": "varchar(255)",
+        "registro_id": {
+          "name": "registro_id",
+          "type": "uuid",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "length": 255,
-          "mappedType": "string"
+          "mappedType": "uuid"
         }
       },
       "name": "participante",
@@ -101,7 +100,125 @@
         }
       ],
       "checks": [],
-      "foreignKeys": {},
+      "foreignKeys": {
+        "participante_registro_id_foreign": {
+          "constraintName": "participante_registro_id_foreign",
+          "columnNames": [
+            "registro_id"
+          ],
+          "localTableName": "public.participante",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.registro",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "gen_random_uuid()",
+          "mappedType": "uuid"
+        },
+        "payment_id": {
+          "name": "payment_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "payer_id": {
+          "name": "payer_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "uuid"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "default": "'pending'",
+          "mappedType": "string"
+        }
+      },
+      "name": "registro",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": [
+            "payer_id"
+          ],
+          "composite": false,
+          "keyName": "registro_payer_id_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "registro_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "registro_payer_id_foreign": {
+          "constraintName": "registro_payer_id_foreign",
+          "columnNames": [
+            "payer_id"
+          ],
+          "localTableName": "public.registro",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.participante",
+          "updateRule": "cascade"
+        }
+      },
       "nativeEnums": {}
     },
     {

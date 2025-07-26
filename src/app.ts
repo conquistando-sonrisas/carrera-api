@@ -10,11 +10,13 @@ import cors from 'cors'
 import helmet from 'helmet';
 import carreraRouter from './routes/carreraRouter';
 import orm from './config/db';
+import { requestContextHelper } from './middlewares/ormHelper';
+import logger from './config/logger';
 
 
 export async function bootstrap(port: number) {
   await tryToConnectToDb();
-  
+
   const app = express();
   app.set('trust proxy', 1)
   /**Middlewares app level */
@@ -26,12 +28,14 @@ export async function bootstrap(port: number) {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
+  // add request context orm
+  app.use(requestContextHelper)
 
   /** Route definition */
   app.use('/api/v1/carrera', carreraRouter);
 
   const server = app.listen(port, () => {
-    process.stdout.write(`App started listening on port ${port}`);
+    logger.info(`App started listening on port ${port}`);
   });
 
   return server;
@@ -41,9 +45,9 @@ export async function bootstrap(port: number) {
 async function tryToConnectToDb() {
   try {
     if (!process.env.DB_NAME) return;
-    
+
     await orm.connect();
   } catch (err) {
-    console.log('Connection to database failed', err)
+    logger.error('Connection to database failed', err)
   }
 } 

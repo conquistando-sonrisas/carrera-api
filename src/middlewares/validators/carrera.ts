@@ -12,11 +12,11 @@ export const createPublicParticipantesValidation = () => {
     body('main.correo').isEmail().optional(),
     body('main.telefono').isLength({ max: 14, min: 14 }).trim().optional(),
 
-    body(`payment.transaction_amount`).isFloat().toFloat(),
-    body(`payment.issuer_id`).isInt().toInt(),
-    body(`payment.payer.email`).trim().notEmpty().isEmail(),
-    body(`payment.token`).trim().notEmpty(),
-    body(`payment.payment_method_id`).trim().notEmpty(),
+    // body(`payment.transaction_amount`).isFloat().toFloat(),
+    // body(`payment.issuer_id`).isInt().toInt(),
+    // body(`payment.payer.email`).trim().notEmpty().isEmail(),
+    // body(`payment.token`).trim().notEmpty(),
+    // body(`payment.payment_method_id`).trim().notEmpty(),
   ]
 }
 

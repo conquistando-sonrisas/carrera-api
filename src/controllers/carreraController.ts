@@ -4,87 +4,55 @@ import { CreatePublicParticipanteRequest } from "../middlewares/validators/carre
 import { Participante } from "../entities/Participante.entity";
 import { Boleto } from "../entities/Boleto.entity";
 import orm from "../config/db";
-import { calculateFees, processDonacionCarrera, roundToTwo } from "../services/carreraService";
+import { calculateFees, processDonacionCarrera, registerParticipantes, registerPayerParticipante, roundToTwo } from "../services/carreraService";
 import logger from "../config/logger";
+import { Registro } from "../entities/Registro.entity";
 
 
 
-/**
- * process payment
- * - start transaction
- * 
- * - create participants
- * - if creation has error
- *   - rollback
- *   - return error
- * 
- * - create payment
- * - if payment has error
- *   - rollback 
- *   - return error
- * 
- * - commit transaction
- * 
- * - return response with payment id
-*/
-export async function registerParticipantesPublic(req: Request, res: Response, next: NextFunction) {
+export async function registerParticipantesPublic(req: Request, res: Response, _: NextFunction) {
   const { main, extra = [], payment } = matchedData(req) as CreatePublicParticipanteRequest;
-  const em = orm.em.fork();
-  await em.begin();
+  // TODO: validate user has not use its email to register themselves
+  const grossAmount = (extra.length + 1) * 350;
+  const fees = calculateFees(grossAmount);
+  const total = roundToTwo(grossAmount + fees);
 
+  await orm.em.begin();
   try {
+    const payer = registerPayerParticipante(main);
+    const registro = new Registro(payer);
+    orm.em.persist(registro);
 
-    const { correo, telefono, ..._main } = main;
-    const mainParticipante = new Participante(_main, { correo, telefono });
+    payer.registro = registro;
+    await orm.em.flush()
 
-    const participantes: Participante[] = [];
-    for (let i = 0; i < extra.length; i++) {
-      const currentParticipante = extra[i];
-      const participanteExtra = new Participante({ ...currentParticipante, registeredBy: main.correo });
-      participantes.push(participanteExtra);
-    }
-    const allParticipantes = [mainParticipante, ...participantes];
-    em.persist(allParticipantes)
-
-    const boletos: Boleto[] = []
-    for (let i = 0; i < allParticipantes.length; i++) {
-      const currentParticipante = allParticipantes[i];
-      const boleto = new Boleto();
-      boleto.participante = currentParticipante;
-      boleto.status = 'pending_payment';
-      boleto.createdBy = correo;
-      boletos.push(boleto)
-    }
-    em.persist(boletos);
+    registerParticipantes(extra, registro.id);
 
     // procesamiento de pagos
-    const grossAmount = allParticipantes.length * 350;
-    const fees = calculateFees(grossAmount);
-    const total = roundToTwo(grossAmount + fees);
-
     const paymentResult = await processDonacionCarrera({
-      issuer_id: payment.issuer_id,
-      payment_method_id: payment.payment_method_id,
-      token: payment.token,
-      transaction_amount: total,
+      ...payment,
+      total,
       email: main.correo,
-      boletoId: boletos[0].id,
-    })
+      registroId: registro.id
+    });
 
-    res.status(200).json(paymentResult)
-
-    await em.commit();
-    return;
+    await orm.em.commit();
+    return res.status(200).json(paymentResult)
   } catch (err) {
     logger.error(err)
-    await em.rollback();
-    throw new Error('Error al registrar participante (s)')
+    await orm.em.rollback();
+    throw new Error(`Error al registrar participante${extra.length > 0 ? ' (s)' : ''}`)
   }
 }
 
 
-export async function processBoletoDonation(req: Request, res: Response, next: NextFunction) {
+export async function processBoletoDonation(req: Request, res: Response, _: NextFunction) {
   console.log('got to controller')
+  // asignar boletos
+  console.log('matchedData', matchedData(req))
+  console.log('query', req.query)
+  console.log('body', req.body)
+  console.log('headers', req.headers)
   res.status(200).json({ message: 'it worked' })
   return;
 }

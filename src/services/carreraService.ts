@@ -23,11 +23,12 @@ export const processDonacionCarrera = async (args: DonacionUnicaArgs & { registr
     body: {
       transaction_amount: args.total,
       token: args.token,
-      description: 'Registro a carrera 5k Conquistando Mil Sonrisas',
+      description: 'Registro prueba',
       installments: 1,
       payment_method_id: args.payment_method_id,
       issuer_id: args.issuer_id,
       external_reference: args.registroId,
+      statement_descriptor: 'LUIS_CCC',
       payer: {
         email: args.email
       },
@@ -75,20 +76,46 @@ export const registerPayerParticipante = (participante: PayerParticipante) => {
 }
 
 
-export const assignBoletos = (participantes: Participante[], emailCreatedBy: string) => {
-  const boletos: Boleto[] = []
+export const assignBoletos = async (registroId: string, args: { createdBy: string, status: string }) => {
+  const participantes = await orm.em.findAll(Participante, { where: { registro: { id: registroId } } });
+  const boletos: Boleto[] = [];
+
   for (let i = 0; i < participantes.length; i++) {
     const currentParticipante = participantes[i];
     const boleto = new Boleto();
     boleto.participante = currentParticipante;
-    boleto.status = 'pending_payment';
-    boleto.createdBy = emailCreatedBy;
+    boleto.status = args.status;
+    boleto.createdBy = args.createdBy;
     boletos.push(boleto);
   }
 
   orm.em.persist(boletos);
 }
 
-export const sendBoletosToPayer = () => {
+export const assignBoletosToParticipantes = async (registro: Registro) => {
+  const payer = await orm.em.findOneOrFail(Participante, { id: registro.payer.id })
+  if (!payer.correo) {
+    throw new Error('Payer has no registered email');
+  }
 
+  await assignBoletos(registro.id, { createdBy: payer.correo, status: 'paid' });
+  // generate qrs
+  // send email to payer with qrs
+  return;
+}
+
+
+
+export const updateStatusOfRegistroWithPayment = async (paymentId: string) => {
+  const payment = await carreraDonacion.get({ id: paymentId });
+
+  const registro = await orm.em.findOneOrFail(Registro, {
+    paymentId,
+    id: payment.external_reference
+  });
+
+  registro.status = payment.status === 'approved' ? 'paid' : 'failed';
+  orm.em.flush();
+
+  return { registro, payment };
 }

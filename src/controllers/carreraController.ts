@@ -4,7 +4,7 @@ import { CreatePublicParticipanteRequest } from "../middlewares/validators/carre
 import { Participante } from "../entities/Participante.entity";
 import { Boleto } from "../entities/Boleto.entity";
 import orm from "../config/db";
-import { calculateFees, processDonacionCarrera, registerParticipantes, registerPayerParticipante, roundToTwo } from "../services/carreraService";
+import { assignBoletos, calculateFees, processDonacionCarrera, registerParticipantes, registerPayerParticipante, roundToTwo, assignBoletosToParticipantes as assignAndSendBoletosToPayer, updateStatusOfRegistroWithPayment } from "../services/carreraService";
 import logger from "../config/logger";
 import { Registro } from "../entities/Registro.entity";
 
@@ -47,12 +47,27 @@ export async function registerParticipantesPublic(req: Request, res: Response, _
 
 
 export async function processBoletoDonation(req: Request, res: Response, _: NextFunction) {
-  console.log('got to controller')
-  // asignar boletos
-  console.log('matchedData', matchedData(req))
-  console.log('query', req.query)
-  console.log('body', req.body)
-  console.log('headers', req.headers)
-  res.status(200).json({ message: 'it worked' })
-  return;
+  const { action } = req.body;
+  const { data } = matchedData(req);
+  const { id: paymentId } = data;
+
+  if (action !== 'payment.updated') {
+    logger.info('unhandle webhook event', req.body);
+    return res.sendStatus(200); // sending OK to avoid MP sending the webhook request again
+  }
+
+  const { registro, payment } = await updateStatusOfRegistroWithPayment(paymentId);
+  if (registro.status !== 'paid') {
+    logger.warn({
+      message: 'registro had an invalid payment state',
+      paymentReason: `${payment.status}: ${payment.status_detail}`
+    })
+    return res.sendStatus(200); // sending OK to avoid MP sending the webhook request again
+  }
+  
+  await assignAndSendBoletosToPayer(registro);
+
+  return res.status(200).json({
+    message: `Boletos enviados a ${registro.payer.correo}`
+  })
 }

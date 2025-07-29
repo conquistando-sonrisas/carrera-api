@@ -28,7 +28,6 @@ export async function registerParticipantesPublic(req: Request, res: Response, _
 
     registerParticipantes(extra, registro.id);
 
-    // procesamiento de pagos
     const paymentResult = await processDonacionCarrera({
       ...payment,
       total,
@@ -46,7 +45,7 @@ export async function registerParticipantesPublic(req: Request, res: Response, _
 }
 
 
-export async function processBoletoDonation(req: Request, res: Response, _: NextFunction) {
+export async function processPaymentUpdate(req: Request, res: Response, _: NextFunction) {
   const { action } = req.body;
   const { data } = matchedData(req);
   const { id: paymentId } = data;

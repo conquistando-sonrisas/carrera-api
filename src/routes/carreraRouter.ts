@@ -1,7 +1,7 @@
 import express, { NextFunction, Request, Response } from 'express'
 import { createPublicParticipantesValidation } from '../middlewares/validators/carrera';
 import { validator } from '../middlewares/validate';
-import { processBoletoDonation, registerParticipantesPublic } from '../controllers/carreraController';
+import { processPaymentUpdate, registerParticipantesPublic } from '../controllers/carreraController';
 import { paymentWebhookValidation } from '../middlewares/validators/mercadopago';
 import { verifySignature } from '../middlewares/verifyMercadoPago';
 
@@ -18,7 +18,7 @@ carreraRouter.post('/webhook',
   paymentWebhookValidation(),
   validator,
   verifySignature,
-  processBoletoDonation
+  processPaymentUpdate
 )
 
 

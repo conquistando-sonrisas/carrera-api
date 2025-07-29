@@ -7,6 +7,10 @@ import orm from "../config/db";
 import { MainParticipante as PayerParticipante, ParticipanteExtra } from "../middlewares/validators/carrera";
 import { rel } from "@mikro-orm/core";
 import { Registro } from "../entities/Registro.entity";
+import QRCode from "qrcode";
+import logger from "../config/logger";
+import transporter from "../config/mail";
+import { Attachment } from "nodemailer/lib/mailer";
 
 
 type DonacionUnicaArgs = {
@@ -31,6 +35,7 @@ export const processDonacionCarrera = async (args: DonacionUnicaArgs & { registr
       statement_descriptor: 'LUIS_CCC',
       payer: {
         email: args.email
+        // TODO: Add payer's first and lastname 
       },
       three_d_secure_mode: 'optional'
     },
@@ -90,21 +95,61 @@ export const assignBoletos = async (registroId: string, args: { createdBy: strin
   }
 
   orm.em.persist(boletos);
+  await orm.em.flush();
+  return boletos;
 }
 
 export const assignBoletosToParticipantes = async (registro: Registro) => {
-  const payer = await orm.em.findOneOrFail(Participante, { id: registro.payer.id })
-  if (!payer.correo) {
-    throw new Error('Payer has no registered email');
-  }
+  try {
+    const payer = await orm.em.findOneOrFail(Participante, { id: registro.payer.id })
+    if (!payer.correo) {
+      throw new Error('Payer does not have an email');
+    }
 
-  await assignBoletos(registro.id, { createdBy: payer.correo, status: 'paid' });
-  // generate qrs
-  // send email to payer with qrs
-  return;
+    const boletos = await assignBoletos(registro.id, { createdBy: payer.correo, status: 'paid' });
+    const QRs = await generateQRs(boletos);
+    await sendQRsToPayer(payer.correo, payer.nombre, QRs);
+
+  } catch (err) {
+    logger.error('Error while assigning boletos', err);
+  }
 }
 
 
+const generateQRs = async (boletos: Boleto[]) => {
+  const attachments: Attachment[] = []
+  for (let i = 0; i < boletos.length; i++) {
+    const boleto = boletos[i];
+    try {
+      const qr = await QRCode.toBuffer(boleto.id, { scale: 8 });
+      attachments.push({
+        filename: `Boleto #${boleto.numero} - ${boleto.participante.nombre}`,
+        content: qr,
+        contentType: 'image/png'
+      })
+
+    } catch (err) {
+      logger.error(`Error while processing QR for boleto with id ${boletos[i]}`, err)
+    }
+  }
+  return attachments;
+}
+
+
+const sendQRsToPayer = async (email: string, nombre: string, QRAttachments: Attachment[]) => {
+  try {
+    const info = await transporter.sendMail({
+      from: `"Conquistando Sonrisas A.C." <${process.env.MAIL_USER}>`,
+      to: email,
+      subject: 'Boletos Carrera Conquistando Mil Sonrisas',
+      text: `Hola ${nombre}, aqui están tus boletos :)`,
+      attachments: QRAttachments
+    })
+    logger.info(`Email sent to ${email} <messageId: ${info.messageId}>`);
+  } catch (err) {
+    logger.error('Error while sending email', err);
+  }
+}
 
 export const updateStatusOfRegistroWithPayment = async (paymentId: string) => {
   const payment = await carreraDonacion.get({ id: paymentId });

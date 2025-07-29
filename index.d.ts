@@ -9,6 +9,10 @@ declare global {
       DB_PASSWORD: string;
       CARRERA_PAGO_KEY: string;
       NOTIFICATION_URL: string;
+      MAIL_HOST: string;
+      MAIL_PORT: string;
+      MAIL_USER: string;
+      MAIL_PASSWORD: string;
     }
   }
 }

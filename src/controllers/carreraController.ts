@@ -32,6 +32,8 @@ export async function registerParticipantesPublic(req: Request, res: Response, _
       ...payment,
       total,
       email: main.correo,
+      firstName: main.nombre,
+      lastName: main.apellido,
       registroId: registro.id
     });
 

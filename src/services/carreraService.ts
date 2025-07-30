@@ -22,20 +22,21 @@ type DonacionUnicaArgs = {
 const carreraDonacion = new Payment(carreraApiClient);
 
 
-export const processDonacionCarrera = async (args: DonacionUnicaArgs & { registroId: string }) => {
+export const processDonacionCarrera = async (args: DonacionUnicaArgs & { registroId: string, firstName: string, lastName: string }) => {
   const res = await carreraDonacion.create({
     body: {
       transaction_amount: args.total,
       token: args.token,
-      description: 'Registro prueba',
+      description: `Donativo Conquistando Mil Sonrisas ${new Date().getFullYear()}.`,
       installments: 1,
       payment_method_id: args.payment_method_id,
       issuer_id: args.issuer_id,
       external_reference: args.registroId,
-      statement_descriptor: 'LUIS_CCC',
+      statement_descriptor: 'CONQUISONRISAS CARRERA',
       payer: {
-        email: args.email
-        // TODO: Add payer's first and lastname 
+        email: args.email,
+        first_name: args.firstName,
+        last_name: args.lastName
       },
       three_d_secure_mode: 'optional'
     },
@@ -108,7 +109,7 @@ export const assignBoletosToParticipantes = async (registro: Registro) => {
 
     const boletos = await assignBoletos(registro.id, { createdBy: payer.correo, status: 'paid' });
     const QRs = await generateQRs(boletos);
-    await sendQRsToPayer(payer.correo, payer.nombre, QRs);
+    await sendQRsToPayer(payer.correo, payer.nombreCompleto, QRs);
 
   } catch (err) {
     logger.error('Error while assigning boletos', err);
@@ -123,7 +124,7 @@ const generateQRs = async (boletos: Boleto[]) => {
     try {
       const qr = await QRCode.toBuffer(boleto.id, { scale: 8 });
       attachments.push({
-        filename: `Boleto #${boleto.numero} - ${boleto.participante.nombre}`,
+        filename: `Boleto #${boleto.folio} - ${boleto.participante.nombreCompleto}`,
         content: qr,
         contentType: 'image/png'
       })

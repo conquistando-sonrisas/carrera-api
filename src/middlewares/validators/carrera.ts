@@ -4,7 +4,7 @@ import { body } from "express-validator";
 export const createPublicParticipantesValidation = () => {
   return [
 
-    body(['extra.*.nombre', 'main.nombre']).notEmpty().trim(),
+    body(['extra.*.nombreCompleto', 'main.nombre', 'main.apellido']).notEmpty().trim(),
     body(['extra.*.edad', 'main.edad']).isInt().toInt(),
     body(['extra.*.talla', 'main.talla']).isIn(['infantil', 'xs', 's', 'm', 'g', 'xg']),
     body(['extra.*.sexo', 'main.sexo']).isIn(['mujer', 'hombre']),
@@ -30,16 +30,21 @@ export interface CreatePublicParticipanteRequest {
 
 
 export interface ParticipanteExtra {
-  nombre: string;
+  nombreCompleto: string;
   edad: number;
   talla: 'infantil' | 'xs' | 's' | 'm' | 'g' | 'xg';
   sexo: 'mujer' | 'hombre';
 }
 
 
-export interface MainParticipante extends ParticipanteExtra {
+export interface MainParticipante {
+  nombre: string;
+  apellido: string;
   correo: string;
   telefono: string;
+  edad: number;
+  talla: 'infantil' | 'xs' | 's' | 'm' | 'g' | 'xg';
+  sexo: 'mujer' | 'hombre';
 }
 
 

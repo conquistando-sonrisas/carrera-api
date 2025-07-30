@@ -10,7 +10,7 @@ export class Boleto {
   id!: string;
 
   @Property({ autoincrement: true })
-  numero!: number;
+  folio!: number;
 
   /**
    * - unassigned

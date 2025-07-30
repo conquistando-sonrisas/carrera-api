@@ -22,6 +22,26 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "apellido": {
+          "name": "apellido",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "nombre_completo": {
+          "name": "nombre_completo",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
           "nullable": false,
           "length": 255,
           "mappedType": "string"
@@ -233,8 +253,8 @@
           "default": "gen_random_uuid()",
           "mappedType": "uuid"
         },
-        "numero": {
-          "name": "numero",
+        "folio": {
+          "name": "folio",
           "type": "serial",
           "unsigned": true,
           "autoincrement": true,

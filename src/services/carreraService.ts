@@ -145,7 +145,7 @@ const sendQRsToPayer = async (email: string, nombre: string, QRAttachments: Atta
       text: `Hola ${nombre}, aqui están tus boletos :)`,
       attachments: QRAttachments
     })
-    logger.info(`Email sent to ${email} <messageId: ${info.messageId}>`);
+    logger.info(`Email sent to ${email} <messageId: ${info.messageId}> ${info.accepted} ${info.response}`);
   } catch (err) {
     logger.error('Error while sending email', err);
   }

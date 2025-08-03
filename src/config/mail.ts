@@ -2,6 +2,7 @@
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
+  name: process.env.MAIL_HOST,
   host: process.env.MAIL_HOST,
   port: parseInt(process.env.MAIL_PORT),
   secure: true,

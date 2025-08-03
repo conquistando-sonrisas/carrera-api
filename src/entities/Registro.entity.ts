@@ -2,7 +2,9 @@ import { Entity, Formula, OneToOne, OptionalProps, PrimaryKey, Property, rel } f
 import { Participante } from "./Participante.entity";
 
 
-@Entity()
+@Entity({
+  tableName: 'registro'
+})
 export class Registro {
 
   [OptionalProps]?: 'createdAt' | 'updatedAt';

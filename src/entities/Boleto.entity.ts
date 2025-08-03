@@ -1,7 +1,9 @@
 import { Entity, OneToOne, OptionalProps, PrimaryKey, Property } from "@mikro-orm/core";
 import { Participante } from "./Participante.entity";
 
-@Entity()
+@Entity({
+  tableName: 'boleto'
+})
 export class Boleto {
 
   [OptionalProps]?: 'createdAt' | 'updatedAt';

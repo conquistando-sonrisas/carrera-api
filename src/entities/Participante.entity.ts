@@ -2,7 +2,9 @@ import { Entity, ManyToMany, ManyToOne, PrimaryKey, Property } from "@mikro-orm/
 import { Registro } from "./Registro.entity";
 
 
-@Entity()
+@Entity({
+  tableName: 'participante'
+})
 export class Participante {
 
   @PrimaryKey({ type: 'uuid', defaultRaw: 'gen_random_uuid()' })

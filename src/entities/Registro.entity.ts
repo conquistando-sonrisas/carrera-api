@@ -1,4 +1,4 @@
-import { Entity, OneToOne, OptionalProps, PrimaryKey, Property, rel } from "@mikro-orm/core";
+import { Entity, Formula, OneToOne, OptionalProps, PrimaryKey, Property, rel } from "@mikro-orm/core";
 import { Participante } from "./Participante.entity";
 
 
@@ -22,11 +22,21 @@ export class Registro {
   @Property({ type: 'timestamptz', onUpdate: () => new Date() })
   updatedAt: Date = new Date();
 
+  @Property()
+  createdBy!: string;
+
   // pending, paid, failed
   @Property()
   status = 'pending'
 
-  constructor(payer: Participante) {
+  @Property()
+  type!: string
+
+  @Formula(alias => `(select count(*) from participante where participante.registro_id = ${alias}.id)`, { lazy: true })
+  boletosCount?: number;
+
+  constructor(payer: Participante, createdBy: string) {
     this.payer = payer;
+    this.createdBy = createdBy;
   }
 }

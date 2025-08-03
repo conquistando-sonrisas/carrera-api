@@ -12,17 +12,6 @@ export class Boleto {
   @Property({ autoincrement: true })
   folio!: number;
 
-  /**
-   * - unassigned
-   * - pending_payment
-   * - paid
-   * - checked_in
-   * - cancelled?
-   * - refunded?
-   */
-  @Property()
-  status = 'unassigned';
-
   @Property()
   createdBy!: string;
 
@@ -34,4 +23,7 @@ export class Boleto {
 
   @OneToOne()
   participante!: Participante;
+
+  @Property({ nullable: true, type: 'timestamptz' })
+  checkInAt: Date | null = null;
 }

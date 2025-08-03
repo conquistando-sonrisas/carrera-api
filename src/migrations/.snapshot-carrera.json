@@ -188,6 +188,16 @@
           "length": 6,
           "mappedType": "datetime"
         },
+        "created_by": {
+          "name": "created_by",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
         "status": {
           "name": "status",
           "type": "varchar(255)",
@@ -197,6 +207,16 @@
           "nullable": false,
           "length": 255,
           "default": "'pending'",
+          "mappedType": "string"
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
           "mappedType": "string"
         }
       },
@@ -262,17 +282,6 @@
           "nullable": false,
           "mappedType": "integer"
         },
-        "status": {
-          "name": "status",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 255,
-          "default": "'unassigned'",
-          "mappedType": "string"
-        },
         "created_by": {
           "name": "created_by",
           "type": "varchar(255)",
@@ -311,6 +320,16 @@
           "primary": false,
           "nullable": false,
           "mappedType": "uuid"
+        },
+        "check_in_at": {
+          "name": "check_in_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
         }
       },
       "name": "boleto",

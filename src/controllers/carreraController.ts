@@ -4,7 +4,7 @@ import { CreatePublicParticipanteRequest } from "../middlewares/validators/carre
 import { Participante } from "../entities/Participante.entity";
 import { Boleto } from "../entities/Boleto.entity";
 import orm from "../config/db";
-import { assignBoletos, calculateFees, processDonacionCarrera, registerParticipantes, registerPayerParticipante, roundToTwo, assignBoletosToParticipantes as assignAndSendBoletosToPayer, updateStatusOfRegistroWithPayment } from "../services/carreraService";
+import { assignBoletos, calculateFees, processDonacionCarrera, registerParticipantes, registerPayerParticipante, roundToTwo,  assignAndSendBoletosToPayer, updateStatusOfRegistroWithPayment } from "../services/carreraService";
 import logger from "../config/logger";
 import { Registro } from "../entities/Registro.entity";
 
@@ -20,11 +20,13 @@ export async function registerParticipantesPublic(req: Request, res: Response, _
   await orm.em.begin();
   try {
     const payer = registerPayerParticipante(main);
-    const registro = new Registro(payer);
+    if (!payer.correo) throw new Error('No payer email')
+    const registro = new Registro(payer, payer.correo);
+    registro.type = 'public'
     orm.em.persist(registro);
 
     payer.registro = registro;
-    await orm.em.flush()
+    await orm.em.flush();
 
     registerParticipantes(extra, registro.id);
 
@@ -36,6 +38,10 @@ export async function registerParticipantesPublic(req: Request, res: Response, _
       lastName: main.apellido,
       registroId: registro.id
     });
+
+    if (paymentResult.paymentId){
+      registro.paymentId = paymentResult.paymentId.toString();
+    }
 
     await orm.em.commit();
     return res.status(200).json(paymentResult)
@@ -65,7 +71,7 @@ export async function processPaymentUpdate(req: Request, res: Response, _: NextF
     })
     return res.sendStatus(200); // sending OK to avoid MP sending the webhook request again
   }
-  
+
   await assignAndSendBoletosToPayer(registro);
 
   return res.status(200).json({

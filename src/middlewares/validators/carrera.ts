@@ -20,14 +20,36 @@ export const createPublicParticipantesValidation = () => {
   ]
 }
 
+export const createPrivateParticipantesValidation = () => {
+  return [
+    body(['extra.*.nombreCompleto', 'main.nombre', 'main.apellido']).notEmpty().trim(),
+    body(['extra.*.edad', 'main.edad']).isInt().toInt(),
+    body(['extra.*.talla', 'main.talla']).isIn(['infantil', 'xs', 's', 'm', 'g', 'xg']),
+    body(['extra.*.sexo', 'main.sexo']).isIn(['mujer', 'hombre']),
+
+    body('main.correo').isEmail().optional(),
+    body('main.telefono').isLength({ max: 14, min: 14 }).trim().optional(),
+
+    body('status').isIn(['paid', 'pending', 'partial_paid']),
+    body('aceptoTerminos').isBoolean().toBoolean()
+  ]
+}
+
+
 
 export interface CreatePublicParticipanteRequest {
   extra: ParticipanteExtra[];
   main: MainParticipante;
-  payment: PaymentBase
-
+  payment: PaymentBase;
 }
 
+
+export interface CreatePrivateParticipanteRequest {
+  extra: ParticipanteExtra[];
+  main: MainParticipante;
+  status: string;
+  aceptoTerminos: boolean;
+}
 
 export interface ParticipanteExtra {
   nombreCompleto: string;

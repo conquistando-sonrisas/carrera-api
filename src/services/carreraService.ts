@@ -82,7 +82,7 @@ export const registerPayerParticipante = (participante: PayerParticipante) => {
 }
 
 
-export const assignBoletos = async (registroId: string, args: { createdBy: string, status: string }) => {
+export const assignBoletos = async (registroId: string, args: { createdBy: string }) => {
   const participantes = await orm.em.findAll(Participante, { where: { registro: { id: registroId } } });
   const boletos: Boleto[] = [];
 
@@ -90,7 +90,6 @@ export const assignBoletos = async (registroId: string, args: { createdBy: strin
     const currentParticipante = participantes[i];
     const boleto = new Boleto();
     boleto.participante = currentParticipante;
-    boleto.status = args.status;
     boleto.createdBy = args.createdBy;
     boletos.push(boleto);
   }
@@ -100,14 +99,14 @@ export const assignBoletos = async (registroId: string, args: { createdBy: strin
   return boletos;
 }
 
-export const assignBoletosToParticipantes = async (registro: Registro) => {
+export const assignAndSendBoletosToPayer = async (registro: Registro) => {
   try {
     const payer = await orm.em.findOneOrFail(Participante, { id: registro.payer.id })
     if (!payer.correo) {
       throw new Error('Payer does not have an email');
     }
 
-    const boletos = await assignBoletos(registro.id, { createdBy: payer.correo, status: 'paid' });
+    const boletos = await assignBoletos(registro.id, { createdBy: payer.correo });
     const QRs = await generateQRs(boletos);
     await sendQRsToPayer(payer.correo, payer.nombreCompleto, QRs);
 

@@ -12,6 +12,8 @@ import carreraRouter from './routes/carreraRouter';
 import orm from './config/db';
 import { requestContextHelper } from './middlewares/ormHelper';
 import logger from './config/logger';
+import jwtCheck from './config/auth';
+import adminRouter from './routes/adminRouter';
 
 
 export async function bootstrap(port: number) {
@@ -33,6 +35,8 @@ export async function bootstrap(port: number) {
 
   /** Route definition */
   app.use('/api/v1/carrera', carreraRouter);
+
+  app.use('/api/v1/admin', jwtCheck, adminRouter)
 
   const server = app.listen(port, () => {
     logger.info(`App started listening on port ${port}`);
